@@ -1,0 +1,220 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 2px solid #ccc;
+  background-color: #f8f8f8;
+}
+
+.timer {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d9534f;
+  background: white;
+  padding: 5px 10px;
+  border: 2px solid #d9534f;
+  border-radius: 5px;
+  position: fixed;
+  top: 20px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+.question {
+  margin-bottom: 30px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.navigation {
+  width: 100px;
+  border-left: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 80px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  background-color: #f4f4f4;
+}
+
+.nav-button {
+  margin-bottom: 8px;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+.nav-button.answered {
+  background-color: #4caf50;
+  color: white;
+}
+
+.export-button,
+.submit-button {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+.question label {
+  display: block;
+  margin-left: 10px;
+  margin-top: 5px;
+  text-align: left;
+}
+
+.answer-checkbox {
+  margin-right: 8px;
+}
+
+.integer-input {
+  display: block;
+  margin-left: 10px;
+  margin-top: 10px;
+  padding: 5px;
+  width: 200px;
+  font-size: 1rem;
+}
+.subject-heading {
+  margin-top: 40px;
+  font-size: 1.6rem;
+  color: #333;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 5px;
+}
+
+.options {
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.option-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.integer-container {
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.integer-input {
+  padding: 6px 10px;
+  font-size: 1rem;
+  width: 220px;
+}
+.left-align {
+  text-align: left;
+  margin-left: 10px;
+}
+
+.option-label {
+  display: block;
+  margin: 5px 0;
+}
+
+.clear-button {
+  margin-top: 8px;
+  padding: 4px 10px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* ---------- */
+/* For correct, wrong, and unattempted styles */
+.header-score {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+.correct {
+  color: green;
+  font-weight: bold;
+}
+.wrong {
+  color: red;
+  font-weight: bold;
+}
+.score-box {
+  width: 100px;
+  height: 40px;
+  background-color: #e6f4ea; /* light green tone */
+  color: #1b5e20;             /* dark green for contrast */
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  padding: 4px;
+  margin-left: 12px;
+
+  position: fixed;
+  top: 16px;
+  right: 16px;
+
+  border-radius: 6px;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 1000;
+}
+
+.nav-button {
+  margin-bottom: 8px;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+.nav-correct {
+  background-color: #28a745;
+  color: white;
+}
+
+.nav-wrong {
+  background-color: #dc3545;
+  color: white;
+}
+
+.nav-unattempted {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: black;
+}

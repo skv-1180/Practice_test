@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JEE Practice Test - Results</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<div class="header">
+  <h1>JEE Practice Test - Results</h1>
+  <div class="score-box">
+        Score: <%= total %> / <%= results.length * 4 %>
+  </div>
+</div>
+
+
+
+
+  <% const subjectMap = { p: "Physics", c: "Chemistry", m: "Maths" }; %>
+
+  <div class="main-container">
+    <div class="content">
+      <% let globalIndex = 0; %>
+      <% ['p', 'c', 'm'].forEach(subj => { %>
+        <h2 class="subject-heading"><%= subjectMap[subj] %></h2>
+
+        <% results.filter(q => q.subject === subj).forEach(q => { %>
+          <div class="question" id="question-<%= globalIndex %>">
+            <h3>Q<%= globalIndex + 1 %>:</h3>
+            <img src="<%= q.path %>" alt="Question Image" />
+
+            <% if (!q.isInteger) { %>
+              <div class="options left-align">
+                <% ['a', 'b', 'c', 'd'].forEach(opt => { %>
+                  <label class="option-label
+                    <% if (q.correctAnswer === opt) { %> correct <% } %>
+                    <% if (q.userAnswer === opt && q.userAnswer !== q.correctAnswer) { %> wrong <% } %>">
+                    <input type="checkbox" disabled <%= q.userAnswer === opt ? 'checked' : '' %> />
+                    <%= opt.toUpperCase() %>
+                  </label>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="integer-container left-align">
+                <div>
+                  Your Answer:
+                  <span class="<%= q.userAnswer === q.correctAnswer ? 'correct' : q.userAnswer ? 'wrong' : '' %>">
+                    <%= q.userAnswer || 'Unattempted' %>
+                  </span>
+                </div>
+                <div>
+                  Correct Answer: <span class="correct"><%= q.correctAnswer %></span>
+                </div>
+              </div>
+            <% } %>
+
+            <div class="score">
+              Score:
+              <span class="<%= q.score > 0 ? 'correct' : q.score < 0 ? 'wrong' : '' %>">
+                <%= q.score %>
+              </span>
+            </div>
+          </div>
+          <% globalIndex++; %>
+        <% }) %>
+      <% }) %>
+    </div>
+
+    <div class="navigation" id="nav-panel">
+      <% results.forEach((q, index) => {
+        let statusClass = 'nav-unattempted';
+        if (q.userAnswer === q.correctAnswer) statusClass = 'nav-correct';
+        else if (q.userAnswer) statusClass = 'nav-wrong';
+      %>
+        <button class="nav-button <%= statusClass %>" onclick="scrollToQuestion(<%= index %>)">
+          <%= index + 1 %>
+        </button>
+      <% }) %>
+    </div>
+  </div>
+
+  <script>
+    function scrollToQuestion(index) {
+      const el = document.getElementById("question-" + index);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  </script>
+</body>
+</html>

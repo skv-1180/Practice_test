@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JEE Practice Test</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="header">
+    <h1>JEE Practice Test</h1>
+    <div class="timer" id="timer">03:00:00</div>
+  </div>
+
+<% const subjectMap = { p: "Physics", c: "Chemistry", m: "Maths" }; %>
+
+<div class="main-container">
+  <div class="content">
+
+    <% ['p', 'c', 'm'].forEach((subj) => { %>
+      <h2 class="subject-heading"><%= subjectMap[subj] %></h2>
+
+      <% questions.filter(q => q.subject === subj).forEach((q) => { 
+           const index = questions.indexOf(q); %>
+        <div class="question" id="question-<%= index %>">
+          <h3>Q<%= index + 1 %>:</h3>
+          <img src="<%= q.path %>" alt="Question Image" />
+
+          <% if (!q.isInteger) { %>
+            <div class="options left-align">
+              <% ['a', 'b', 'c', 'd'].forEach(opt => { %>
+                <label class="option-label">
+                  <input type="checkbox" name="q<%= index %>" value="<%= opt %>"
+                         <% if (savedAnswers[q.id] === opt) { %> checked <% } %>
+                         data-qid="<%= q.id %>" data-index="<%= index %>" class="answer-checkbox" />
+                  <%= opt.toUpperCase() %>
+                </label>
+              <% }) %>
+              <button type="button" class="clear-button" data-qid="<%= q.id %>" data-index="<%= index %>">Clear</button>
+            </div>
+          <% } else { %>
+            <div class="integer-container left-align">
+              <label>
+                <input type="text" placeholder="Enter value"
+                       value="<%= savedAnswers[q.id] || '' %>"
+                       data-qid="<%= q.id %>" data-index="<%= index %>" class="integer-input" />
+              </label>
+              <button type="button" class="clear-button" data-qid="<%= q.id %>" data-index="<%= index %>">Clear</button>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    <% }) %>
+
+    <form id="submit-form" method="POST" action="/submit">
+      <input type="hidden" name="ids" id="question-ids" />
+      <button type="submit" class="submit-button">Submit</button>
+    </form>
+
+  </div>
+
+  <div class="navigation" id="nav-panel">
+    <% questions.forEach((q, index) => { %>
+      <button class="nav-button <%= savedAnswers[q.id] ? 'answered' : '' %>"
+              onclick="scrollToQuestion(<%= index %>)"
+              id="nav-btn-<%= index %>"><%= index + 1 %></button>
+    <% }) %>
+  </div>
+</div>
+
+<script>
+  const TIMER_DURATION_MS = <%= duration %>;
+  const QUESTION_IDS = <%- JSON.stringify(questions.map(q => q.id)) %>;
+</script>
+<script src="/script.js"></script>
+</body>
+</html>
