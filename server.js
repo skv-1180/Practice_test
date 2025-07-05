@@ -239,6 +239,7 @@ app.get("/thankyou", (req, res) => {
     </html>
   `);
 });
+console.log("Connecting to Mongo URI:", process.env.MONGO_URI);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
