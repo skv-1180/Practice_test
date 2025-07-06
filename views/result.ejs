@@ -1,89 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>JEE Practice Test - Results</title>
   <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .toggle-container {
+      margin-top: 10px;
+      /* margin-left: 10px; */
+      text-align: left;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 10px;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-left: 4px solid #4CAF50;
+      border-radius: 6px;
+    }
+
+    .solution-img {
+      max-width: 100%;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .toggle-btn {
+      margin-top: 6px;
+      background: none;
+      color: #007bff;
+      border: none;
+      padding: 2px 6px;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .toggle-btn:hover {
+      color: #0056b3;
+      text-decoration: none;
+    }
+
+    }
+  </style>
 </head>
+
 <body>
-<div class="header">
-  <h1>JEE Practice Test - Results</h1>
-  <div class="score-box">
-        Score: <%= total %> / <%= results.length * 4 %>
+  <div class="header">
+    <h1>JEE Practice Test - Results</h1>
+    <div class="score-box">
+      Score: <%= total %> / <%= results.length * 4 %>
+    </div>
   </div>
-</div>
 
+  <% const subjectMap={ p: "Physics" , c: "Chemistry" , m: "Maths" }; %>
 
+    <div class="main-container">
+      <div class="content">
+        <% let globalIndex=0; %>
+          <% ['p', 'c' , 'm' ].forEach(subj=> { %>
+            <h2 class="subject-heading">
+              <%= subjectMap[subj] %>
+            </h2>
 
+            <% results.filter(q=> q.subject === subj).forEach(q => { %>
+              <div class="question" id="question-<%= globalIndex %>">
+                <h3>Q<%= globalIndex + 1 %>:</h3>
+                <img src="<%= q.path %>" alt="Question Image" />
 
-  <% const subjectMap = { p: "Physics", c: "Chemistry", m: "Maths" }; %>
-
-  <div class="main-container">
-    <div class="content">
-      <% let globalIndex = 0; %>
-      <% ['p', 'c', 'm'].forEach(subj => { %>
-        <h2 class="subject-heading"><%= subjectMap[subj] %></h2>
-
-        <% results.filter(q => q.subject === subj).forEach(q => { %>
-          <div class="question" id="question-<%= globalIndex %>">
-            <h3>Q<%= globalIndex + 1 %>:</h3>
-            <img src="<%= q.path %>" alt="Question Image" />
-
-            <% if (!q.isInteger) { %>
-              <div class="options left-align">
-                <% ['a', 'b', 'c', 'd'].forEach(opt => { %>
-                  <label class="option-label
+                <% if (!q.isInteger) { %>
+                  <div class="options left-align">
+                    <% ['a', 'b' , 'c' , 'd' ].forEach(opt=> { %>
+                      <label class="option-label
                     <% if (q.correctAnswer === opt) { %> correct <% } %>
                     <% if (q.userAnswer === opt && q.userAnswer !== q.correctAnswer) { %> wrong <% } %>">
-                    <input type="checkbox" disabled <%= q.userAnswer === opt ? 'checked' : '' %> />
-                    <%= opt.toUpperCase() %>
-                  </label>
+                        <input type="checkbox" disabled <%=q.userAnswer===opt ? 'checked' : '' %> />
+                        <%= opt.toUpperCase() %>
+                      </label>
+                      <% }) %>
+                  </div>
+                  <% } else { %>
+                    <div class="integer-container left-align">
+                      <div>
+                        Your Answer:
+                        <span class="<%= q.userAnswer === q.correctAnswer ? 'correct' : q.userAnswer ? 'wrong' : '' %>">
+                          <%= q.userAnswer || 'Unattempted' %>
+                        </span>
+                      </div>
+                      <div>
+                        Correct Answer: <span class="correct">
+                          <%= q.correctAnswer %>
+                        </span>
+                      </div>
+                    </div>
+                    <% } %>
+
+                      <div class="singscore">
+                        Score:
+                        <span class="<%= q.score > 0 ? 'correct' : q.score < 0 ? 'wrong' : '' %>">
+                          <%= q.score %>
+                        </span>
+                      </div>
+
+
+                      <!-- <div class="toggle-container">
+                        <button class="toggle-btn" onclick="toggleSolution('<%= globalIndex %>')">Show Solution</button>
+                      </div>
+
+                     
+                      <div class="solution" id="solution-<%= globalIndex %>">
+                        <strong>Solution:</strong><br />
+                        <img src="/solutions/<%= q.subject %>/<%= q.isInteger ? 'integer' : 'mcq' %>/<%= q.id %>"
+                          alt="Solution Image" class="solution-img" />
+                      </div>  -->
+
+                      <!-- ✅ Always visible solution block with link -->
+                      <div class="solution" style="display: block; margin-top: 10px;">
+                        <strong>Solution:</strong><br />
+                        <% if (q.solutionLink) { %>
+                          <a href="<%= q.solutionLink %>" target="_blank" rel="noopener noreferrer">
+                            View Solution
+                          </a>
+                          <% } else { %>
+                            <em>No solution available.</em>
+                            <% } %>
+                      </div>
+
+
+              </div>
+              <% globalIndex++; %>
                 <% }) %>
-              </div>
-            <% } else { %>
-              <div class="integer-container left-align">
-                <div>
-                  Your Answer:
-                  <span class="<%= q.userAnswer === q.correctAnswer ? 'correct' : q.userAnswer ? 'wrong' : '' %>">
-                    <%= q.userAnswer || 'Unattempted' %>
-                  </span>
-                </div>
-                <div>
-                  Correct Answer: <span class="correct"><%= q.correctAnswer %></span>
-                </div>
-              </div>
-            <% } %>
+                  <% }) %>
+      </div>
 
-            <div class="score">
-              Score:
-              <span class="<%= q.score > 0 ? 'correct' : q.score < 0 ? 'wrong' : '' %>">
-                <%= q.score %>
-              </span>
-            </div>
-          </div>
-          <% globalIndex++; %>
-        <% }) %>
-      <% }) %>
+      <div class="navigation" id="nav-panel">
+        <% results.forEach((q, index)=> {
+          let statusClass = 'nav-unattempted';
+          if (q.userAnswer === q.correctAnswer) statusClass = 'nav-correct';
+          else if (q.userAnswer) statusClass = 'nav-wrong';
+          %>
+          <button class="nav-button <%= statusClass %>" onclick="scrollToQuestion(<%= index %>)">
+            <%= index + 1 %>
+          </button>
+          <% }) %>
+      </div>
     </div>
 
-    <div class="navigation" id="nav-panel">
-      <% results.forEach((q, index) => {
-        let statusClass = 'nav-unattempted';
-        if (q.userAnswer === q.correctAnswer) statusClass = 'nav-correct';
-        else if (q.userAnswer) statusClass = 'nav-wrong';
-      %>
-        <button class="nav-button <%= statusClass %>" onclick="scrollToQuestion(<%= index %>)">
-          <%= index + 1 %>
-        </button>
-      <% }) %>
-    </div>
-  </div>
+    <script>
+      function scrollToQuestion(index) {
+        const el = document.getElementById("question-" + index);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
 
-  <script>
-    function scrollToQuestion(index) {
-      const el = document.getElementById("question-" + index);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  </script>
+      function toggleSolution(index) {
+        const el = document.getElementById("solution-" + index);
+        const btn = event.target;
+        if (el.style.display === "block") {
+          el.style.display = "none";
+          btn.textContent = "Show Solution";
+        } else {
+          el.style.display = "block";
+          btn.textContent = "Hide Solution";
+        }
+      }
+    </script>
 </body>
+
 </html>

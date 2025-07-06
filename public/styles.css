@@ -112,14 +112,20 @@ body {
 }
 
 .options {
-  margin-left: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px; /* space between options */
   margin-top: 10px;
+  flex-wrap: wrap; /* optional, allows wrapping on small screens */
 }
-
+.clear-wrapper {
+  margin-left: 10px;
+  text-align: left; /* aligns the clear button to the left */
+}
 .option-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .integer-container {
@@ -153,6 +159,10 @@ body {
   display: inline-block;
 }
 
+.singscore {
+  margin-left: 10px;
+  margin-top: 10px;
+}
 /* ---------- */
 /* For correct, wrong, and unattempted styles */
 .header-score {

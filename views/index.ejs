@@ -35,7 +35,6 @@
                   <%= opt.toUpperCase() %>
                 </label>
               <% }) %>
-              <button type="button" class="clear-button" data-qid="<%= q.id %>" data-index="<%= index %>">Clear</button>
             </div>
           <% } else { %>
             <div class="integer-container left-align">
@@ -44,9 +43,11 @@
                        value="<%= savedAnswers[q.id] || '' %>"
                        data-qid="<%= q.id %>" data-index="<%= index %>" class="integer-input" />
               </label>
-              <button type="button" class="clear-button" data-qid="<%= q.id %>" data-index="<%= index %>">Clear</button>
             </div>
           <% } %>
+            <div class="clear-wrapper">
+    <button type="button" class="clear-button" data-qid="<%= q.id %>" data-index="<%= index %>">Clear</button>
+  </div>
         </div>
       <% }) %>
     <% }) %>

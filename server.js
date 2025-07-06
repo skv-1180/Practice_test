@@ -39,58 +39,99 @@ mongoose.connect(process.env.MONGO_URI, {}).then(() => {
   console.error("MongoDB connection error:", err);
 });
 
-// Config
-const SUBJECTS = ["p", "c", "m"];
 const TIMER_DURATION_MS = 3 * 60 * 60 * 1000; // 3 hours
-// const TIMER_DURATION_MS = 3 * 1000 * 60; // 3 hours
 
-app.use("/questions", express.static(path.join(__dirname, "questions")));
-const MCQ_COUNT_PER_SUBJECT = 20; // example value
-const INTEGER_COUNT_PER_SUBJECT = 5;   // adjustable
+// mcq screnshot name -> image.png
+
+const MCQ_COUNT_PER_SUBJECT = 20;
+const INTEGER_COUNT_PER_SUBJECT = 5;
+const test_folder = path.join(__dirname, "test1");
+
+app.use("/questions", express.static(path.join(test_folder)));
+
+const SUBJECTS = ["p", "c", "m"]; // define if not already
 
 function loadQuestions() {
   const questions = [];
 
-  SUBJECTS.forEach((subj) => {
-    // Paths to each type
-    const mcqPath = path.join(__dirname, "questions", "mcq");
-    const intPath = path.join(__dirname, "questions", "integer");
+  SUBJECTS.forEach((subject) => {
+    const mcqBase = path.join(test_folder, subject, "mcq");
+    const intBase = path.join(test_folder, subject, "integer");
 
-    // Filter & select MCQs
-    const allMcq = fs.readdirSync(mcqPath).filter((f) => f.startsWith(subj + "_"));
-    const selectedMcq = allMcq.slice(0, MCQ_COUNT_PER_SUBJECT);
-    
-    selectedMcq.forEach((file) => {
-      const [subject, chapter, number, answerWithExt] = file.split("_");
-      const answer = answerWithExt.split(".")[0];
-      questions.push({
-        id: file,
-        subject,
-        path: "/questions/mcq/" + file,
-        answer,
-        isInteger: false,
-      });
-    });
+    // --- MCQ Questions ---
+    for (let i = 1; i <= MCQ_COUNT_PER_SUBJECT; i++) {
+      const qFolder = path.join(mcqBase, String(i));
+      let found = false;
 
-    // Filter & select Integer questions
-    const allInt = fs.readdirSync(intPath).filter((f) => f.startsWith(subj + "_"));
-    const selectedInt = allInt.slice(0, INTEGER_COUNT_PER_SUBJECT);
-    selectedInt.forEach((file) => {
-      const [subject, chapter, number, answerWithExt] = file.split("_");
-      const answer = path.parse(answerWithExt).name;
+      for (const option of ["a", "b", "c", "d"]) {
+        const optionPath = path.join(qFolder, option, "image.png");
+        if (fs.existsSync(optionPath)) {
+          const solTxt = path.join(qFolder, "solution", "solution.txt");
+          let solutionLink = "";
+          if (fs.existsSync(solTxt)) {
+            try {
+              solutionLink = fs.readFileSync(solTxt, "utf-8").trim();
+            } catch (e) {
+              console.warn(`Failed to read solution: ${solTxt}`);
+            }
+          }
 
-      questions.push({
-        id: file,
-        subject,
-        path: "/questions/integer/" + file,
-        answer,
-        isInteger: true,
-      });
-    });
+          questions.push({
+            id: `mcq-${subject}-${i}`,
+            subject,
+            path: `/questions/${subject}/mcq/${i}/${option}/image.png`,
+            answer: option,
+            isInteger: false,
+            solutionLink,
+          });
+
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        console.warn(`No MCQ image found for ${subject} Q${i}`);
+      }
+    }
+
+    // --- Integer Questions ---
+    for (let i = 1; i <= INTEGER_COUNT_PER_SUBJECT; i++) {
+      const qPath = path.join(intBase, String(i), "question");
+
+      if (fs.existsSync(qPath)) {
+        const files = fs.readdirSync(qPath).filter(f => f.endsWith(".png"));
+        if (files.length > 0) {
+          const file = files[0];
+          const answer = path.parse(file).name;
+
+          const solTxt = path.join(intBase, String(i), "solution", "solution.txt");
+          let solutionLink = "";
+          if (fs.existsSync(solTxt)) {
+            try {
+              solutionLink = fs.readFileSync(solTxt, "utf-8").trim();
+            } catch (e) {
+              console.warn(`Failed to read solution: ${solTxt}`);
+            }
+          }
+
+          questions.push({
+            id: `int-${subject}-${i}`,
+            subject,
+            path: `/questions/${subject}/integer/${i}/question/${file}`,
+            answer,
+            isInteger: true,
+            solutionLink,
+          });
+        }
+      }
+    }
   });
 
   return questions;
 }
+
+
 
 app.get("/result", async (req, res) => {
   const sessionId = req.cookies.sessionId;
@@ -195,6 +236,7 @@ app.get("/test", async (req, res) => {
 // 4. Submit an Answer (AJAX)
 app.post("/submit-answer", async (req, res) => {
   const { questionId, answer } = req.body;
+  console.log(`Received answer for question ${questionId}: ${answer}`);
   await Answer.findOneAndUpdate(
     { questionId },
     { answer, timestamp: new Date() },
@@ -203,7 +245,7 @@ app.post("/submit-answer", async (req, res) => {
   res.sendStatus(200);
 });
 
-// 5. Submit Test + Generate CSV
+// 5. Submit Test 
 app.post("/submit", async (req, res) => {
   try {
     const rawIds = req.body.ids || "[]";
@@ -213,12 +255,16 @@ app.post("/submit", async (req, res) => {
       return res.status(400).send("No question IDs provided.");
     }
 
-    const answers = await Answer.find({ questionId: { $in: ids } });
+    const sessionId = req.cookies.sessionId;
+    if (!sessionId) {
+      return res.status(400).send("Session ID missing.");
+    }
 
-    const csv = ["Question,Answer"];
-    answers.forEach((a) => csv.push(`${a.questionId},${a.answer}`));
-    const filePath = path.join(__dirname, "public", "answers.csv");
-    fs.writeFileSync(filePath, csv.join("\n"));
+    // Set remaining time to 0 (store submission time)
+    await TestSession.findOneAndUpdate(
+      { sessionId },
+      { startTime: new Date(Date.now() - TIMER_DURATION_MS) } // This will make remaining = 0
+    );
 
     res.redirect("/thankyou");
   } catch (err) {
@@ -231,16 +277,45 @@ app.post("/submit", async (req, res) => {
 app.get("/thankyou", (req, res) => {
   res.send(`
     <html>
-      <head><title>Thank You</title></head>
-      <body style="text-align:center; padding-top:50px;">
+      <head>
+        <title>Thank You</title>
+        <style>
+          body {
+            text-align: center;
+            padding-top: 50px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+          }
+          h1 {
+            color: #333;
+          }
+          .button-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+          }
+          .button-link:hover {
+            background-color: #45a049;
+          }
+        </style>
+      </head>
+      <body>
         <h1>Thank you for submitting the test!</h1>
-        <a href="/answers.csv" download>Download Your Answers</a>
+        <a class="button-link" href="/result">See Your Result</a>
       </body>
     </html>
   `);
 });
-console.log("Connecting to Mongo URI:", process.env.MONGO_URI);
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+//https://dashboard.render.com/web/srv-d1klmr3e5dus73eo9og0/deploys/dep-d1km952dbo4c73a1v9r0
+
